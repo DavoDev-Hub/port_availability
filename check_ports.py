@@ -30,8 +30,8 @@ from dataclasses import dataclass
 from typing import Iterable, Sequence
 
 DIR_SCRIPT = os.path.dirname(os.path.abspath(__file__))
-SHELL_SCRIPT = os.path.join(DIR_SCRIPT, "check_port.sh")
-PS_SCRIPT = os.path.join(DIR_SCRIPT, "check_port.ps1")
+SHELL_SCRIPT = os.path.join(DIR_SCRIPT, "linux", "check_port.sh")
+PS_SCRIPT = os.path.join(DIR_SCRIPT, "windows", "check_port.ps1")
 DEFAULT_IMAGE = "port-checker"
 
 EXIT_OK = 0
@@ -68,6 +68,9 @@ class Checker:
         if docker is None:
             raise RuntimeError("docker no se encuentra en el PATH")
 
+        if not os.path.isfile(SHELL_SCRIPT):
+            raise RuntimeError(f"no existe el script: {SHELL_SCRIPT}")
+
         cmd = [
             docker, "run", "--rm",
             "-t",
@@ -79,7 +82,7 @@ class Checker:
         if not image_exists(self.image):
             raise RuntimeError(
                 f"la imagen '{self.image}' no existe. Construyela con:\n"
-                f"  docker build -t {self.image} {DIR_SCRIPT}"
+                f"  docker build -t {self.image} {os.path.join(DIR_SCRIPT, 'linux')}"
             )
         return cmd
 

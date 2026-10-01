@@ -8,11 +8,24 @@ script de Python que consume ambos scripts enviando múltiples puertos.
 
 ## Estructura del repositorio
 
+```
+port_availability/
+├── linux/
+│   ├── check_port.sh        # Script bash (Linux)
+│   ├── Dockerfile           # Imagen Linux que empaqueta el script
+│   └── .dockerignore
+├── windows/
+│   └── check_port.ps1       # Script PowerShell (Windows)
+├── check_ports.py           # Consume ambos con múltiples puertos
+├── .gitattributes
+└── README.md
+```
+
 | Archivo | Descripción |
 |---|---|
-| `check_port.sh` | Script **bash (Linux)**. Recibe un puerto como argumento y devuelve `OPEN` o `CLOSED`. |
-| `Dockerfile` | Imagen de Linux (`debian:bookworm-slim`) que empaqueta el script bash. |
-| `check_port.ps1` | Script **PowerShell (Windows)**, equivalente funcional al anterior. |
+| `linux/check_port.sh` | Script **bash (Linux)**. Recibe un puerto como argumento y devuelve `OPEN` o `CLOSED`. |
+| `linux/Dockerfile` | Imagen de Linux (`debian:bookworm-slim`) que empaqueta el script bash. |
+| `windows/check_port.ps1` | Script **PowerShell (Windows)**, equivalente funcional al anterior. |
 | `check_ports.py` | Script **Python** que invoca a los dos anteriores con múltiples puertos en paralelo. |
 
 ---
@@ -23,8 +36,8 @@ Los dos scripts de verificación se comportan exactamente igual, para que
 `check_ports.py` pueda consumir cualquiera de los dos:
 
 ```
-./check_port.sh <puerto> [host] [timeout]
-.\check_port.ps1  -Port <puerto> [-TargetHost <host>] [-TimeoutSeconds <timeout>]
+./linux/check_port.sh   <puerto> [host] [timeout]
+.\windows\check_port.ps1 -Port <puerto> [-TargetHost <host>] [-TimeoutSeconds <timeout>]
 ```
 
 | Parámetro | Linux | Windows | Valor por defecto |
@@ -56,8 +69,12 @@ Los dos scripts de verificación se comportan exactamente igual, para que
 ### Construir la imagen
 
 ```bash
-docker build -t port-checker .
+docker build -t port-checker linux/
 ```
+
+> El contexto de build es la carpeta `linux/`, porque ahí están el `Dockerfile`
+> y el `check_port.sh` que copia. También funciona
+> `docker build -t port-checker -f linux/Dockerfile .` desde la raíz.
 
 ### Ejecutar
 
@@ -116,20 +133,20 @@ docker run --rm port-checker 18080 host.docker.internal # OPEN
 
 ```powershell
 # puerto abierto / cerrado
-.\check_port.ps1 -Port 8080
-.\check_port.ps1 -Port 59999
+.\windows\check_port.ps1 -Port 8080
+.\windows\check_port.ps1 -Port 59999
 
 # contra el host visto desde Docker
-.\check_port.ps1 -Port 18080 -Host host.docker.internal
+.\windows\check_port.ps1 -Port 18080 -Host host.docker.internal
 
 # ajustando el timeout y viendo el detalle
-.\check_port.ps1 -Port 8080 -TimeoutSeconds 5 -Verbose
+.\windows\check_port.ps1 -Port 8080 -TimeoutSeconds 5 -Verbose
 ```
 
 Si tu equipo tiene política de ejecución restringida:
 
 ```powershell
-pwsh -NoProfile -ExecutionPolicy Bypass -File .\check_port.ps1 -Port 8080
+pwsh -NoProfile -ExecutionPolicy Bypass -File .\windows\check_port.ps1 -Port 8080
 ```
 
 ### Cómo funciona `check_port.ps1`
@@ -225,8 +242,8 @@ Opciones:
 
 ## Ideas para el video
 
-1. `docker build` y explicar qué hace cada línea del `Dockerfile`.
+1. `docker build -t port-checker linux/` y explicar qué hace cada línea del `Dockerfile`.
 2. `docker run` con un puerto cerrado y luego con uno abierto.
 3. Demostrar la trampa de `127.0.0.1` vs `host.docker.internal`.
-4. El mismo puerto en `check_port.ps1`.
+4. El mismo puerto en `windows\check_port.ps1`.
 5. `check_ports.py --backend both` comparando los dos resultados.

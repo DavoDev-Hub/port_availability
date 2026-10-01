@@ -1,6 +1,6 @@
 # Imagen Linux para ejecutar check_port.sh
 #
-# Construir : docker build -t port-checker .
+# Construir : docker build -t port-checker linux/     (desde la raiz del repo)
 # Ejecutar   : docker run --rm port-checker 8080
 #             docker run --rm port-checker 8080 127.0.0.1 2
 #
