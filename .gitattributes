@@ -1,0 +1,10 @@
+# El script bash DEBE conservar finales de linea LF para correr dentro de Docker/Linux.
+# Sin esto, un clone en Windows (core.autocrlf=true) genera CRLF y el contenedor
+# falla con: bad interpreter: /usr/bin/env bash^M
+*.sh text eol=lf
+*.py text eol=lf
+Dockerfile text eol=lf
+
+# PowerShell y Markdown se leen mejor con CRLF en Windows.
+*.ps1 text eol=crlf
+*.md text eol=crlf

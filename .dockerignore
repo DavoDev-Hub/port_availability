@@ -1,0 +1,11 @@
+.git
+.gitignore
+.gitattributes
+README.md
+__pycache__
+.venv
+venv
+.vscode
+.idea
+check_ports.py
+check_port.ps1
